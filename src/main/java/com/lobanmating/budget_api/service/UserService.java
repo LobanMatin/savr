@@ -4,6 +4,7 @@ import com.lobanmating.budget_api.exception.EmailAlreadyExistsException;
 import com.lobanmating.budget_api.exception.UserNotFoundException;
 import com.lobanmating.budget_api.model.User;
 import com.lobanmating.budget_api.repository.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -11,9 +12,11 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void createUser(UserRequest request) {
@@ -21,9 +24,10 @@ public class UserService {
             throw new EmailAlreadyExistsException(request.getEmail());
         }
 
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
         User user = User.builder()
                 .email(request.getEmail())
-                .password(request.getPassword())
+                .password(encodedPassword)
                 .build();
 
         userRepository.save(user);
