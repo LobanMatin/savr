@@ -3,6 +3,7 @@ package com.lobanmating.budget_api.controller;
 import com.lobanmating.budget_api.dto.UserRequest;
 import com.lobanmating.budget_api.security.JwtUtil;
 import com.lobanmating.budget_api.service.CustomUserDetailsService;
+import com.lobanmating.budget_api.service.TokenBlacklistService;
 import com.lobanmating.budget_api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
     private final UserService userService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @PostMapping("/login")
     public String login(@RequestBody UserRequest request) {
@@ -36,5 +38,12 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@RequestBody UserRequest request) {
         userService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        tokenBlacklistService.blacklist(token);
+        return ResponseEntity.ok("Logged out successfully");
     }
 }
