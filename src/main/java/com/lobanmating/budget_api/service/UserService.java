@@ -5,6 +5,7 @@ import com.lobanmating.budget_api.exception.UserNotFoundException;
 import com.lobanmating.budget_api.model.User;
 import com.lobanmating.budget_api.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import org.springframework.stereotype.Service;
 import java.util.List;
 
