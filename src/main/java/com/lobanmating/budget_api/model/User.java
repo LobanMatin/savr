@@ -25,4 +25,11 @@ public class User {
         this.email = email;
         this.password = password;
     }
+
+    // Factory method to create user with only id
+    public static User withId(Long id) {
+        User user = new User();
+        user.id = id;
+        return user;
+    }
 }
