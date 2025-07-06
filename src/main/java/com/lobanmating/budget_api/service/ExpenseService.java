@@ -6,6 +6,7 @@ import com.lobanmating.budget_api.model.ExpenseCategory;
 import com.lobanmating.budget_api.model.User;
 import com.lobanmating.budget_api.repository.ExpenseRepository;
 import com.lobanmating.budget_api.security.CustomUserDetails;
+import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -67,6 +68,7 @@ public class ExpenseService {
         expenseRepository.deleteById(id);
     }
 
+    @Transactional
     public void deleteAllExpenses() {
         expenseRepository.deleteAllByUserId(getCurrentUserId());
     }
