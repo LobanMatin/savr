@@ -46,6 +46,16 @@ public class ExpenseController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> updateExpenseCategory(
+            @PathVariable Long id,
+            @RequestParam String category,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        expenseService.updateCategory(id, userDetails.getId(), category);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping
     public ResponseEntity<Void> deleteExpenses() {
         expenseService.deleteAllExpenses();

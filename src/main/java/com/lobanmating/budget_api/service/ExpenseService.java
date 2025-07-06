@@ -1,12 +1,14 @@
 package com.lobanmating.budget_api.service;
 
 import com.lobanmating.budget_api.dto.ExpenseRequest;
+import com.lobanmating.budget_api.exception.ResourceNotFoundException;
 import com.lobanmating.budget_api.model.Expense;
 import com.lobanmating.budget_api.model.ExpenseCategory;
 import com.lobanmating.budget_api.model.User;
 import com.lobanmating.budget_api.repository.ExpenseRepository;
 import com.lobanmating.budget_api.security.CustomUserDetails;
 import jakarta.transaction.Transactional;
+import org.apache.coyote.BadRequestException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -73,10 +75,13 @@ public class ExpenseService {
         expenseRepository.deleteAllByUserId(getCurrentUserId());
     }
 
-    private Long getCurrentUserId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-        return userDetails.getId();
+    public void updateCategory(Long expenseId, Long userId, String category) {
+        Expense expense = expenseRepository.findByIdAndUserId(expenseId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
+
+        ExpenseCategory categoryEnum = ExpenseCategory.fromString(category);
+        expense.setCategory(categoryEnum);
+        expenseRepository.save(expense);
     }
 
     public void uploadExpensesFromCSV(MultipartFile file) {
@@ -118,5 +123,12 @@ public class ExpenseService {
             throw new RuntimeException("Failed to read CSV file", e);
         }
     }
+
+    private Long getCurrentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+        return userDetails.getId();
+    }
+
 
 }

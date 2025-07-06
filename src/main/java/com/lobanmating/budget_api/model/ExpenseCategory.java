@@ -26,15 +26,14 @@ public enum ExpenseCategory {
             return NA;
         }
 
-        value = value.trim().toUpperCase();
-        if (value.equals("N/A")) {
-            return NA;
-        }
+        String normalized = value.trim();
 
-        try {
-            return ExpenseCategory.valueOf(value);
-        } catch (IllegalArgumentException e) {
-            return NA; // or throw an error if you want stricter validation
-        }
+        // Try to match displayName (case-insensitive)
+        return Arrays.stream(ExpenseCategory.values())
+                .filter(c -> c.displayName.equalsIgnoreCase(normalized)
+                        || c.name().equalsIgnoreCase(normalized)
+                        || (normalized.equalsIgnoreCase("N/A") && c == NA))
+                .findFirst()
+                .orElse(NA);
     }
 }
