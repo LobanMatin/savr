@@ -25,8 +25,6 @@ public class Budget {
     @Column(nullable = false)
     private BigDecimal totalLimit;
 
-
-    // TODO: add functionality for multiple income streams
     @Column(nullable = false)
     private BigDecimal totalIncome;
 

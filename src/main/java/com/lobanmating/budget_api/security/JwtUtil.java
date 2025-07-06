@@ -26,7 +26,6 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // TODO: add search by user id functionality for lightweight searching without making db calls
     public String generateToken(Map<String, Object> extraClaims, CustomUserDetails userDetails) {
         return Jwts
                 .builder()

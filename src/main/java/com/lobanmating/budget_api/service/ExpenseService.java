@@ -36,8 +36,7 @@ public class ExpenseService {
     }
 
     public void createExpense(ExpenseRequest expenseRequest) {
-        // Default category to N/A for now
-        // TODO: Replace with NLP later
+        // Default category to N/A
         ExpenseCategory category = ExpenseCategory.NA;
 
         Expense expense = Expense.builder()

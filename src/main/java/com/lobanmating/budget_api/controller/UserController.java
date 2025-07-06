@@ -13,8 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-
-    // TODO: return resopnse entities for all to have more flexibility with return codes
     private final UserService userService;
 
     public UserController(UserService userService) {

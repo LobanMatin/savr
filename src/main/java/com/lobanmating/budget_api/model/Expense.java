@@ -28,7 +28,6 @@ public class Expense {
     @Column(nullable = false)
     private ExpenseCategory category;
 
-    //TODO: account for when dates are nul
     @Column(nullable = false)
     private LocalDate date;
 
