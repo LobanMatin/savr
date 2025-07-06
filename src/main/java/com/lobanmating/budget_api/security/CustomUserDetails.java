@@ -1,34 +1,38 @@
 package com.lobanmating.budget_api.security;
 
+import com.lobanmating.budget_api.model.Role;
 import com.lobanmating.budget_api.model.User;
+import lombok.Data;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+@Data
 public class CustomUserDetails implements UserDetails {
 
-    @Getter
+    private User user;
     private Long id;
     private final String email;
     private final String password;
+    private Role role;
 
     public CustomUserDetails(User user) {
+        this.user = user;
         this.id = user.getId();
         this.email = user.getEmail();
         this.password = user.getPassword();
+        this.role = user.getRole();
     }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
+        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
     @Override
