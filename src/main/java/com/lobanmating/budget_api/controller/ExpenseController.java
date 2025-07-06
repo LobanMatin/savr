@@ -2,11 +2,14 @@ package com.lobanmating.budget_api.controller;
 
 import com.lobanmating.budget_api.dto.ExpenseRequest;
 import com.lobanmating.budget_api.model.Expense;
+import com.lobanmating.budget_api.security.CustomUserDetails;
 import com.lobanmating.budget_api.service.ExpenseService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,6 +37,19 @@ public class ExpenseController {
             expenses = expenseService.getExpensesByCategory(category);
         }
         return ResponseEntity.ok(expenses);
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Void> uploadExpenses(@RequestParam("file") MultipartFile file,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        expenseService.uploadExpensesFromCSV(file);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteExpenses() {
+        expenseService.deleteAllExpenses();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")

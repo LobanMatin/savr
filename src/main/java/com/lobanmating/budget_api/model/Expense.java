@@ -24,9 +24,11 @@ public class Expense {
     @Column(nullable = false)
     private BigDecimal amount;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String category;
+    private ExpenseCategory category;
 
+    //TODO: account for when dates are nul
     @Column(nullable = false)
     private LocalDate date;
 
