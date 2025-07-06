@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -19,24 +20,26 @@ public class JwtUtil {
     @Value("${jwt.expiration:86400000}")
     private long EXPIRATION_TIME;
 
-    private Key getSigningKey() {
+    private Key getSignInKey() {
         // Decode base 64-encoded secret key into bytes
         byte[] keyBytes = Base64.getDecoder().decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
     // TODO: add search by user id functionality for lightweight searching without making db calls
-    public String generateToken(String email) {
-        return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
+    public String generateToken(Map<String, Object> extraClaims, CustomUserDetails userDetails) {
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public Claims extractClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(getSigningKey())
+        return Jwts.parserBuilder().setSigningKey(getSignInKey())
                 .build().parseClaimsJws(token).getBody();
     }
 

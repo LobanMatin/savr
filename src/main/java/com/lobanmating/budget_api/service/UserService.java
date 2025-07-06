@@ -2,6 +2,7 @@ package com.lobanmating.budget_api.service;
 import com.lobanmating.budget_api.dto.UserRequest;
 import com.lobanmating.budget_api.exception.EmailAlreadyExistsException;
 import com.lobanmating.budget_api.exception.UserNotFoundException;
+import com.lobanmating.budget_api.model.Role;
 import com.lobanmating.budget_api.model.User;
 import com.lobanmating.budget_api.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,6 +30,7 @@ public class UserService {
         User user = User.builder()
                 .email(request.getEmail())
                 .password(encodedPassword)
+                .role(Role.USER)
                 .build();
 
         userRepository.save(user);
