@@ -2,13 +2,25 @@ package com.lobanmating.budget_api.service;
 
 import com.lobanmating.budget_api.dto.ExpenseRequest;
 import com.lobanmating.budget_api.model.Expense;
+import com.lobanmating.budget_api.model.ExpenseCategory;
 import com.lobanmating.budget_api.model.User;
 import com.lobanmating.budget_api.repository.ExpenseRepository;
 import com.lobanmating.budget_api.security.CustomUserDetails;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -21,11 +33,9 @@ public class ExpenseService {
     }
 
     public void createExpense(ExpenseRequest expenseRequest) {
-        // Account for category being an optional field
-        String category = expenseRequest.getCategory();
-        if (category == null || category.isBlank()) {
-            category = "N/A";
-        }
+        // Default category to N/A for now
+        // TODO: Replace with NLP later
+        ExpenseCategory category = ExpenseCategory.NA;
 
         Expense expense = Expense.builder()
                 .title(expenseRequest.getTitle())
@@ -57,10 +67,54 @@ public class ExpenseService {
         expenseRepository.deleteById(id);
     }
 
+    public void deleteAllExpenses() {
+        expenseRepository.deleteAllByUserId(getCurrentUserId());
+    }
+
     private Long getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         return userDetails.getId();
+    }
+
+    public void uploadExpensesFromCSV(MultipartFile file) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MM/yyyy");
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            String line;
+            boolean firstLine = true;
+
+            while ((line = reader.readLine()) != null) {
+                if (firstLine) {
+                    firstLine = false;
+                    continue; // skip header
+                }
+
+                String[] values = line.split(",");
+                if (values.length < 3) {
+                    // Skip malformed lines
+                    continue;
+                }
+
+                try {
+                    LocalDate date = LocalDate.parse(values[0].trim(), formatter);
+                    BigDecimal amount = new BigDecimal(values[1].trim());
+                    String title = values[2].trim();
+
+                    if (!expenseRepository.existsByUserIdAndDateAndAmountAndTitle(getCurrentUserId(), date, amount, title)) {
+                        ExpenseRequest request = new ExpenseRequest(title, amount, date);
+                        createExpense(request);
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("Skipping line due to parse error: " + line);
+                    e.printStackTrace();
+                }
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read CSV file", e);
+        }
     }
 
 }
