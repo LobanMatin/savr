@@ -1,5 +1,6 @@
 package com.lobanmatin.budget_api.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -18,12 +19,15 @@ import java.time.LocalDate;
 // Do not include user ID so that it cannot be manipulated through malicious JSON inputs
 public class ExpenseRequest {
 
-    @NotBlank(message = "Name is required")
+    @Schema(description = "Title of the expense", example = "Lunch at cafe")
+    @NotBlank(message = "Title is required")
     private String title;
 
+    @Schema(description = "Expense monetary amount", example = "18.50")
     @NotNull(message = "Amount is required")
     private BigDecimal amount;
 
+    @Schema(description = "Date of expense in YYYY-MM-DD", example = "2025-07-07")
     @PastOrPresent(message = "Date cannot be in the future")
     @NotNull(message = "Date is required")
     private LocalDate date;

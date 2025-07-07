@@ -43,7 +43,12 @@ public class BudgetController {
                             mediaType = "application/json",
                             schema = @Schema(implementation = BudgetRequest.class),
                             examples = {
-                                    @ExampleObject(name = "Example 1", value = "{\"totalIncome\": 4000, \"totalLimit\": 1200}")
+                                    @ExampleObject(name = "Example 1", value = """
+                            {
+                            totalIncome: 4000,
+                            totalLimit: 1200
+                            }
+                            """)
                             }
                     )
             ),

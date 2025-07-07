@@ -46,8 +46,12 @@ public class AuthController {
                             mediaType = "application/json",
                             schema = @Schema(implementation = UserRequest.class),
                             examples = {
-                                    @ExampleObject(name = "Example 1", value = "{\"email\": \"example@email.com\"," +
-                                            " \"password\": \"examplepassword\"}")
+                                    @ExampleObject(name = "Example 1", value = """
+                            {
+                            "email": "example@email.com",
+                            "password": "examplepasword"
+                            }
+                            """)
                             }
                     )
             ),
@@ -91,12 +95,16 @@ public class AuthController {
                     description = "Credentials for creating new user",
                     required = true,
                     content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = UserRequest.class),
-                    examples = {
-                            @ExampleObject(name = "Example 1", value = "{\"email\": \"example@email.com\"," +
-                                    " \"password\": \"examplepassword\"}")
-                    })
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserRequest.class),
+                            examples = {
+                                    @ExampleObject(name = "Example 1", value = """
+                            {
+                            "email": "example@email.com",
+                            "password": "examplepasword"
+                            }
+                            """)
+                            })
             ),
             responses = {
                     @ApiResponse(responseCode = "201", description = "User successfully registered."),
