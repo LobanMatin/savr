@@ -1,11 +1,13 @@
 package com.lobanmatin.budget_api.service;
 
 import com.lobanmatin.budget_api.dto.BudgetRequest;
+import com.lobanmatin.budget_api.exception.ResourceNotFoundException;
 import com.lobanmatin.budget_api.model.Budget;
 import com.lobanmatin.budget_api.model.ExpenseCategory;
 import com.lobanmatin.budget_api.model.User;
 import com.lobanmatin.budget_api.repository.BudgetRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,7 +24,7 @@ public class BudgetService {
 
     public void createBudget(Long userId, BudgetRequest budgetRequest) {
         if (budgetRepository.findByUserId(userId).isPresent()) {
-            throw new IllegalStateException("Budget already exists for this user.");
+            throw new DataIntegrityViolationException("Budget already exists for this user, creation unsuccessful.");
         }
 
         Budget budget = Budget.builder()
@@ -40,7 +42,7 @@ public class BudgetService {
         Optional<Budget> budgetOptional = budgetRepository.findByUserId(userId);
 
         if (budgetOptional.isEmpty()) {
-            throw new IllegalStateException("Budget does not exist for this user.");
+            throw new ResourceNotFoundException("Budget does not exist for this user.");
         }
 
         return budgetOptional.get();
@@ -49,7 +51,7 @@ public class BudgetService {
     @Transactional
     public void deleteBudget(Long userId) {
         if (budgetRepository.findByUserId(userId).isEmpty()) {
-            throw new IllegalStateException("Budget does not exist for this user.");
+            throw new ResourceNotFoundException("Budget does not exist for this user.");
         }
 
         budgetRepository.deleteByUserId(userId);
@@ -57,7 +59,7 @@ public class BudgetService {
 
     public void adjustTotalLimit(Long userId, BigDecimal limit) {
         Budget budget = budgetRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalStateException("Budget not found for this user."));
+                .orElseThrow(() -> new ResourceNotFoundException("Budget not found for this user."));
 
         budget.setTotalLimit(limit);
         budgetRepository.save(budget);
@@ -65,15 +67,11 @@ public class BudgetService {
 
     public void adjustCategoryLimit(Long userId, ExpenseCategory category, BigDecimal limit) {
         Budget budget = budgetRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalStateException("Budget not found for this user."));
+                .orElseThrow(() -> new ResourceNotFoundException("Budget not found for this user."));
 
         BigDecimal sum = BigDecimal.ZERO;
         for (BigDecimal value : budget.getCategoryLimits().values()) {
             sum = sum.add(value);
-        }
-
-        if (sum.add(limit).compareTo(budget.getTotalLimit()) > 0) {
-            throw new RuntimeException("Category limit exceeds total allowable limit for budget. Please adjust total limit.");
         }
 
         budget.getCategoryLimits().put(category, limit); // Add or update
@@ -82,10 +80,10 @@ public class BudgetService {
 
     public void removeLimit(Long userId, ExpenseCategory category) {
         Budget budget = budgetRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalStateException("Budget not found for this user."));
+                .orElseThrow(() -> new ResourceNotFoundException("Budget not found for this user."));
 
         if (!budget.getCategoryLimits().containsKey(category)) {
-            throw new IllegalArgumentException("Category limit does not exist.");
+            throw new ResourceNotFoundException("Category limit does not exist.");
         }
 
         budget.getCategoryLimits().remove(category);

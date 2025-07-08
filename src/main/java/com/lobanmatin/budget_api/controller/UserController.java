@@ -5,6 +5,7 @@ import com.lobanmatin.budget_api.model.User;
 import com.lobanmatin.budget_api.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -39,16 +40,45 @@ public class UserController {
                             description = "List of users retrieved successfully.",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = User.class, type = "array")
+                                    array = @ArraySchema(
+                                            schema = @Schema(implementation = User.class)
+                                    ),
+                                    examples = {
+                                            @ExampleObject(
+                                                    name = "UserListExample",
+                                                    summary = "Example response with two users",
+                                                    value = """
+                                                            [
+                                                              {
+                                                                "id": 1,
+                                                                "email": "user1@example.com",
+                                                                "password": "hashed-password-1",
+                                                                "role": "USER"
+                                                              },
+                                                              {
+                                                                "id": 2,
+                                                                "email": "admin@example.com",
+                                                                "password": "hashed-password-2",
+                                                                "role": "ADMIN"
+                                                              }
+                                                            ]
+                                                            """
+                                            )
+                                    }
                             )
                     ),
-                    @ApiResponse(responseCode = "403", description = "Access denied. Only admins can perform this operation.")
+                    @ApiResponse(responseCode = "401",
+                            description = "Unauthorized. You must be authenticated to access this resource.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "403",
+                            description = "Access denied. You do not have permission to access this resource.",
+                            content = @Content)
             }
     )
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @Operation(
@@ -59,14 +89,21 @@ public class UserController {
             },
             responses = {
                     @ApiResponse(responseCode = "200", description = "User retrieved successfully."),
-                    @ApiResponse(responseCode = "404", description = "User not found."),
-                    @ApiResponse(responseCode = "403", description = "Access denied. Only admins can perform this operation.")
+                    @ApiResponse(responseCode = "401",
+                            description = "Unauthorized. You must be authenticated to access this resource.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "403",
+                            description = "Access denied. You do not have permission to access this resource.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "404",
+                            description = "User not found.",
+                            content = @Content),
             }
     )
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @Operation(
@@ -74,7 +111,11 @@ public class UserController {
             description = "Permanently delete all users in the system. Requires admin role.",
             responses = {
                     @ApiResponse(responseCode = "204", description = "All users deleted successfully."),
-                    @ApiResponse(responseCode = "403", description = "Access denied. Only admins can perform this operation.")
+                    @ApiResponse(responseCode = "401",
+                            description = "Unauthorized. You must be authenticated to access this resource.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Access denied. Only admins can perform this operation.",
+                            content = @Content)
             }
     )
     @PreAuthorize("hasRole('ADMIN')")

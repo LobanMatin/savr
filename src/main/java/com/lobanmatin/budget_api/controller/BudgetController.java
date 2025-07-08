@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/budget")
-@Tag(name = "Budget", description = "Endpoints for managing user budget CRUD operations")
+@Tag(name = "Budget", description = "Endpoints for managing user budget with CRUD operations")
 public class BudgetController {
 
     private final BudgetService budgetService;
@@ -44,17 +44,23 @@ public class BudgetController {
                             schema = @Schema(implementation = BudgetRequest.class),
                             examples = {
                                     @ExampleObject(name = "Example 1", value = """
-                            {
-                            totalIncome: 4000,
-                            totalLimit: 1200
-                            }
-                            """)
+                                            {
+                                            totalIncome: 4000,
+                                            totalLimit: 1200
+                                            }
+                                            """)
                             }
                     )
             ),
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Budget successfully generated for user."),
-                    @ApiResponse(responseCode = "403", description = "Invalid income/spending limit values or budget already exists, budget creation unsuccessful.")
+                    @ApiResponse(responseCode = "201", description = "Budget successfully generated for user.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "400", description = "Invalid input format.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "409", description = "Budget already exists for this user, creation unsuccessful.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized. You must be authenticated to access this resource.",
+                            content = @Content),
             }
     )
     @PostMapping
@@ -73,7 +79,10 @@ public class BudgetController {
                             description = "Budget successfully retrieved.",
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = Budget.class))),
-                    @ApiResponse(responseCode = "403", description = "No budget found for the user.")
+                    @ApiResponse(responseCode = "401", description = "Unauthorized. You must be authenticated to access this resource.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "404", description = "No budget found for the user.",
+                            content = @Content)
             }
     )
     @GetMapping
@@ -88,8 +97,12 @@ public class BudgetController {
             responses = {
                     @ApiResponse(
                             responseCode = "204",
-                            description = "Budget successfully deleted."),
-                    @ApiResponse(responseCode = "403", description = "No budget found for the user.")
+                            description = "Budget successfully deleted.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized. You must be authenticated to access this resource.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "404", description = "No budget found for the user.",
+                            content = @Content)
             }
     )
     @DeleteMapping
@@ -112,8 +125,10 @@ public class BudgetController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Limit successfully adjusted."),
-                    @ApiResponse(responseCode = "403", description = "No budget found for the user.")
+                            description = "Limit successfully adjusted.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "404", description = "No budget found for the user.",
+                            content = @Content)
             }
     )
     @PostMapping("/limit/total")
@@ -145,15 +160,17 @@ public class BudgetController {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Limit successfully adjusted."),
-                    @ApiResponse(responseCode = "403", description = "No budget found for the user, " +
-                            "or invalid spending category or limit exceeds allowable limit.")
+                            description = "Limit successfully adjusted.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "404", description = "No budget found for the user, " +
+                            "or invalid spending category or limit exceeds allowable limit.",
+                            content = @Content)
             }
     )
     @PostMapping("/limit/category")
     public ResponseEntity<Void> adjustCategoryLimit(@RequestParam ExpenseCategory category,
-                                            @RequestParam BigDecimal limit,
-                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+                                                    @RequestParam BigDecimal limit,
+                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
         budgetService.adjustCategoryLimit(userDetails.getId(), category, limit);
         return ResponseEntity.ok().build();
     }
@@ -171,13 +188,15 @@ public class BudgetController {
                     )
             },
             responses = {
-                    @ApiResponse(responseCode = "204", description = "Spending limit successfully deleted."),
-                    @ApiResponse(responseCode = "403", description = "No budget found or category limit does not exist.")
+                    @ApiResponse(responseCode = "204", description = "Spending limit successfully deleted.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "404", description = "No budget found or category limit does not exist.",
+                            content = @Content)
             }
     )
     @DeleteMapping("/limit/category")
     public ResponseEntity<Void> removeCategoryLimit(@RequestParam ExpenseCategory category,
-                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
         budgetService.removeLimit(userDetails.getId(), category);
         return ResponseEntity.noContent().build();
     }

@@ -47,11 +47,11 @@ public class AuthController {
                             schema = @Schema(implementation = UserRequest.class),
                             examples = {
                                     @ExampleObject(name = "Example 1", value = """
-                            {
-                            "email": "example@email.com",
-                            "password": "examplepasword"
-                            }
-                            """)
+                                            {
+                                            "email": "example@email.com",
+                                            "password": "examplepasword"
+                                            }
+                                            """)
                             }
                     )
             ),
@@ -66,7 +66,8 @@ public class AuthController {
                     ),
                     @ApiResponse(
                             responseCode = "403",
-                            description = "Invalid user credentials. Authorization failed."
+                            description = "Invalid user credentials. Authorization failed.",
+                            content = @Content
                     )
             }
     )
@@ -99,16 +100,19 @@ public class AuthController {
                             schema = @Schema(implementation = UserRequest.class),
                             examples = {
                                     @ExampleObject(name = "Example 1", value = """
-                            {
-                            "email": "example@email.com",
-                            "password": "examplepasword"
-                            }
-                            """)
+                                            {
+                                            "email": "example@email.com",
+                                            "password": "examplepasword"
+                                            }
+                                            """)
                             })
             ),
             responses = {
-                    @ApiResponse(responseCode = "201", description = "User successfully registered."),
-                    @ApiResponse(responseCode = "500", description = "Invalid user credentials, email or password doesn't follow required format or email is already registered.")
+                    @ApiResponse(responseCode = "201", description = "User successfully registered.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "400",
+                            description = "Invalid user credentials: email or password format is incorrect.",
+                            content = @Content)
             }
     )
     @PostMapping("/register")
@@ -129,13 +133,16 @@ public class AuthController {
                     )
             },
             responses = {
-                    @ApiResponse(responseCode = "200", description = "User successfully logged out."),
-                    @ApiResponse(responseCode = "400", description = "Invalid or missing token.")
+                    @ApiResponse(responseCode = "200", description = "User successfully logged out.", content = @Content),
+                    @ApiResponse(responseCode = "400", description = "Missing Authorization header.", content = @Content)
             }
     )
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
+    public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body("Missing or invalid Authorization header");
+        }
+        String token = authHeader.substring(7);
         tokenBlacklistService.blacklist(token);
         return ResponseEntity.ok("Logged out successfully");
     }

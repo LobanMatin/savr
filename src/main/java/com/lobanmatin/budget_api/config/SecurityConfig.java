@@ -1,6 +1,7 @@
 package com.lobanmatin.budget_api.config;
 
 import com.lobanmatin.budget_api.security.JwtAuthenticationFilter;
+import com.lobanmatin.budget_api.security.DelegatingAuthenticationEntryPoint;
 import com.lobanmatin.budget_api.service.CustomUserDetailsService;
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.*;
@@ -15,13 +16,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 @Configuration
 public class SecurityConfig {
-  
-    private final JwtAuthenticationFilter jwtFilter;
-    private final CustomUserDetailsService userDetailsService;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtFilter, CustomUserDetailsService userDetailsService) {
+    private final JwtAuthenticationFilter jwtFilter;
+    private final DelegatingAuthenticationEntryPoint authenticationEntryPoint;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtFilter,
+                          DelegatingAuthenticationEntryPoint authenticationEntryPoint) {
         this.jwtFilter = jwtFilter;
-        this.userDetailsService = userDetailsService;
+        this.authenticationEntryPoint = authenticationEntryPoint;
     }
 
     @Bean
@@ -36,7 +38,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http.csrf(csrf -> csrf.disable())
+        return http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/**",
@@ -45,11 +48,13 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/swagger-resources/**",
-                                "/swagger-ui/index.html",
                                 "/configuration/**",
                                 "/webjars/**"
                         ).permitAll()
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

@@ -4,6 +4,8 @@ import com.lobanmatin.budget_api.dto.BudgetRequest;
 import com.lobanmatin.budget_api.dto.ExpenseRequest;
 import com.lobanmatin.budget_api.model.Budget;
 import com.lobanmatin.budget_api.model.Expense;
+import com.lobanmatin.budget_api.model.ExpenseCategory;
+import com.lobanmatin.budget_api.model.User;
 import com.lobanmatin.budget_api.security.CustomUserDetails;
 import com.lobanmatin.budget_api.service.ExpenseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +28,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/expenses")
+@Tag(name = "Expenses", description = "Endpoints for managing user expenses with CRUD operations")
 public class ExpenseController {
     private final ExpenseService expenseService;
 
@@ -65,9 +69,10 @@ public class ExpenseController {
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "403",
-                            description = "Invalid expense details or budget does not exist for user."
-                    )
+                            responseCode = "400",
+                            description = "Invalid expense details.",
+                            content = @Content
+                    ),
             }
     )
     @PostMapping
@@ -96,6 +101,16 @@ public class ExpenseController {
                                     mediaType = "application/json",
                                     array = @ArraySchema(schema = @Schema(implementation = Expense.class))
                             )
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid input parameter.",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized. You must be authenticated to access this resource.",
+                            content = @Content
                     )
             }
     )
@@ -105,7 +120,14 @@ public class ExpenseController {
         if (category == null) {
             expenses = expenseService.getAllExpenses();
         } else {
-            expenses = expenseService.getExpensesByCategory(category);
+            ExpenseCategory expenseCategory;
+            try {
+                expenseCategory = ExpenseCategory.valueOf(category.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // invalid category string
+                return ResponseEntity.badRequest().build(); // 400 Bad Request
+            }
+            expenses = expenseService.getExpensesByCategory(expenseCategory);
         }
         return ResponseEntity.ok(expenses);
     }
@@ -128,24 +150,59 @@ public class ExpenseController {
             },
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
+                            responseCode = "201",
                             description = "Expenses successfully uploaded and saved.",
                             content = @Content(
                                     mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(implementation = Expense.class))
+                                    array = @ArraySchema(
+                                            schema = @Schema(implementation = Expense.class)
+                                    ),
+                                    examples = {
+                                            @ExampleObject(
+                                                    name = "ExpenseListExample",
+                                                    summary = "Example response with two expenses",
+                                                    value = """
+                                [
+                                  {
+                                    "id": 1,
+                                    "title": "Train ticket",
+                                    "date": "2025-07-01",
+                                    "amount": 3.50,
+                                    "category": "TRANSPORT"
+                                  },
+                                  {
+                                    "id": 2,
+                                    "title": "Dinner",
+                                    "date": "2025-07-02",
+                                    "amount": 18.00,
+                                    "category": "FOOD"
+                                  }
+                                ]
+                                """
+                                            )
+                                    }
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "500",
-                            description = "Internal server error while processing the uploaded file."
+                            responseCode = "400",
+                            description = "File is missing or invalid format",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized. You must be authenticated to access this resource.",
+                            content = @Content
                     )
             }
     )
     @PostMapping("/upload")
-    public ResponseEntity<Void> uploadExpenses(@RequestParam("file") MultipartFile file,
+    public ResponseEntity<String> uploadExpenses(@RequestParam("file") MultipartFile file,
                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().body("CSV file is missing");
+        }
         expenseService.uploadExpensesFromCSV(file);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body("Expenses successfully uploaded and saved.");
     }
 
 
@@ -157,27 +214,37 @@ public class ExpenseController {
                     @Parameter(name = "category", description = "New category to assign to the expense. Must match an enum value.", required = true, example = "TRANSPORT")
             },
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Expense category updated successfully."),
-                    @ApiResponse(responseCode = "403", description = "Expense does not belong to the user or category is invalid."),
-                    @ApiResponse(responseCode = "404", description = "Expense not found.")
+                    @ApiResponse(responseCode = "200",
+                            description = "Expense category updated successfully.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "403",
+                            description = "Expense does not belong to the user or category is invalid.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "404",
+                            description = "Expense not found.",
+                            content = @Content)
             }
     )
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateExpenseCategory(
+    public ResponseEntity<String> updateExpenseCategory(
             @PathVariable Long id,
             @RequestParam String category,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         expenseService.updateCategory(id, userDetails.getId(), category);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body("Category of expense successfully updated.");
     }
 
     @Operation(
             summary = "Delete all expenses (Admin only)",
             description = "Deletes all expenses in the system. This action is restricted to users with the ADMIN role.",
             responses = {
-                    @ApiResponse(responseCode = "204", description = "All expenses deleted successfully."),
-                    @ApiResponse(responseCode = "403", description = "User does not have the ADMIN role.")
+                    @ApiResponse(responseCode = "204",
+                            description = "All expenses deleted successfully.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "403",
+                            description = "Access denied. You do not have permission to access this resource.",
+                            content = @Content)
             }
     )
     @PreAuthorize("hasRole('ADMIN')")
@@ -194,8 +261,12 @@ public class ExpenseController {
                     @Parameter(name = "id", description = "ID of the expense to delete", required = true, example = "7")
             },
             responses = {
-                    @ApiResponse(responseCode = "204", description = "Expense deleted successfully."),
-                    @ApiResponse(responseCode = "404", description = "Expense not found.")
+                    @ApiResponse(responseCode = "204",
+                            description = "Expense deleted successfully.",
+                            content = @Content),
+                    @ApiResponse(responseCode = "404",
+                            description = "Expense not found.",
+                            content = @Content)
             }
     )
     @DeleteMapping("/{id}")

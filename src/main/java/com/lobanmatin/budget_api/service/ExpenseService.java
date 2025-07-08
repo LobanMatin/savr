@@ -50,7 +50,7 @@ public class ExpenseService {
         return expenseRepository.findByUserId(getCurrentUserId());
     }
 
-    public List<Expense> getExpensesByCategory(String category) {
+    public List<Expense> getExpensesByCategory(ExpenseCategory category) {
         return expenseRepository.findByUserIdAndCategory(getCurrentUserId(), category);
     }
 
