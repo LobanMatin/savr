@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TokenBlacklistService {
 
     // Thread safe implementation of blacklist
-    private Set<String> blacklist = ConcurrentHashMap.newKeySet();
+    private final Set<String> blacklist = ConcurrentHashMap.newKeySet();
 
     public void blacklist(String token) {
         blacklist.add(token);

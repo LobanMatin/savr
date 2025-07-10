@@ -49,12 +49,12 @@ public class ExpenseController {
                                     @ExampleObject(
                                             name = "Example 1",
                                             value = """
-                    {
-                      "title": "Lunch at cafe",
-                      "date": "2025-07-07",
-                      "amount": 18.50
-                    }
-                    """
+                                                    {
+                                                      "title": "Lunch at cafe",
+                                                      "date": "2025-07-07",
+                                                      "amount": 18.50
+                                                    }
+                                                    """
                                     )
                             }
                     )
@@ -162,23 +162,23 @@ public class ExpenseController {
                                                     name = "ExpenseListExample",
                                                     summary = "Example response with two expenses",
                                                     value = """
-                                [
-                                  {
-                                    "id": 1,
-                                    "title": "Train ticket",
-                                    "date": "2025-07-01",
-                                    "amount": 3.50,
-                                    "category": "TRANSPORT"
-                                  },
-                                  {
-                                    "id": 2,
-                                    "title": "Dinner",
-                                    "date": "2025-07-02",
-                                    "amount": 18.00,
-                                    "category": "FOOD"
-                                  }
-                                ]
-                                """
+                                                            [
+                                                              {
+                                                                "id": 1,
+                                                                "title": "Train ticket",
+                                                                "date": "2025-07-01",
+                                                                "amount": 3.50,
+                                                                "category": "TRANSPORT"
+                                                              },
+                                                              {
+                                                                "id": 2,
+                                                                "title": "Dinner",
+                                                                "date": "2025-07-02",
+                                                                "amount": 18.00,
+                                                                "category": "FOOD"
+                                                              }
+                                                            ]
+                                                            """
                                             )
                                     }
                             )
@@ -197,7 +197,7 @@ public class ExpenseController {
     )
     @PostMapping("/upload")
     public ResponseEntity<String> uploadExpenses(@RequestParam("file") MultipartFile file,
-                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
         if (file == null || file.isEmpty()) {
             return ResponseEntity.badRequest().body("CSV file is missing");
         }

@@ -1,6 +1,7 @@
 package com.lobanmatin.budget_api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -23,9 +24,11 @@ public class Budget {
     private User user;
 
     @Column(nullable = false)
+    @DecimalMin(value = "0.0", inclusive = false, message = "Total spending limit must be greater than 0")
     private BigDecimal totalLimit;
 
     @Column(nullable = false)
+    @DecimalMin(value = "0.0", inclusive = false, message = "Total income must be greater than 0")
     private BigDecimal totalIncome;
 
     @ElementCollection
