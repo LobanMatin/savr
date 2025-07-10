@@ -7,8 +7,10 @@ import com.lobanmatin.budget_api.model.ExpenseCategory;
 import com.lobanmatin.budget_api.model.User;
 import com.lobanmatin.budget_api.repository.BudgetRepository;
 import jakarta.transaction.Transactional;
+import org.apache.coyote.BadRequestException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -61,6 +63,12 @@ public class BudgetService {
         Budget budget = budgetRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Budget not found for this user."));
 
+        if (limit.compareTo(budget.getTotalIncome()) > 0) {
+            throw new RuntimeException("Limit cannot be greater than total income");
+        } else if (limit.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Limit must be greater than zero");
+        }
+
         budget.setTotalLimit(limit);
         budgetRepository.save(budget);
     }
@@ -68,6 +76,10 @@ public class BudgetService {
     public void adjustCategoryLimit(Long userId, ExpenseCategory category, BigDecimal limit) {
         Budget budget = budgetRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Budget not found for this user."));
+
+        if (!budget.getCategoryLimits().containsKey(category)) {
+            throw new ResourceNotFoundException("Category limit does not exist.");
+        }
 
         BigDecimal sum = BigDecimal.ZERO;
         for (BigDecimal value : budget.getCategoryLimits().values()) {
