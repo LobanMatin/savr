@@ -2,12 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/LobanMatin/savr'
-            }
-        }
-
         stage('Build') {
             steps {
                 sh './mvnw clean package -DskipTests=false'
