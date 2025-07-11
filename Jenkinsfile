@@ -2,6 +2,13 @@ pipeline {
     agent any
 
     stages {
+        stage('Checkout') {
+            steps {
+                // This tells Jenkins to check out the repo defined in the job config
+                checkout scm
+            }
+        }
+
         stage('Build') {
             steps {
                 sh 'chmod +x mvnw'
