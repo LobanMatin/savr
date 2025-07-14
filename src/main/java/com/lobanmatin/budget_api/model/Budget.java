@@ -34,6 +34,7 @@ public class Budget {
     @ElementCollection
     @CollectionTable(name = "budget_category_limits", joinColumns = @JoinColumn(name = "budget_id"))
     @MapKeyColumn(name = "category")
+    @MapKeyEnumerated(EnumType.STRING)
     @Column(name = "category_limit")
     private Map<ExpenseCategory, BigDecimal> categoryLimits = new HashMap<>();
 }
