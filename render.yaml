@@ -4,16 +4,22 @@ services:
     env: docker
     plan: free
     repo: https://github.com/LobanMatin/savr
-    branch: main
+    branch: feature/testing
     dockerfilePath: ./Dockerfile
     envVars:
       - key: POSTGRES_DB
-        value: ""
+        sync: false
       - key: POSTGRES_USER
-        value: ""
+        sync: false
       - key: POSTGRES_PASS
-        value: ""
+        sync: false
       - key: JWT_SECRET
-        value: ""
+        sync: false
       - key: JWT_EXPIRATION
         value: "86400000"
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
