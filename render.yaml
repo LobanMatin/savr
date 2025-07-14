@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: savr-api
+    env: docker
+    plan: free
+    repo: https://github.com/LobanMatin/savr
+    branch: main
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: POSTGRES_DB
+        value: ""
+      - key: POSTGRES_USER
+        value: ""
+      - key: POSTGRES_PASS
+        value: ""
+      - key: JWT_SECRET
+        value: ""
+      - key: JWT_EXPIRATION
+        value: "86400000"
