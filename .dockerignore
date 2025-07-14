@@ -1,0 +1,23 @@
+# Sensitive environment variables
+.env
+
+# Build output (Maven or Gradle)
+target/
+!target/budget-api-0.0.1-SNAPSHOT.jar
+build/
+
+# IDE/editor files
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore

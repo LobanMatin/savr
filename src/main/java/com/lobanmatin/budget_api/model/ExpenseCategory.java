@@ -28,7 +28,6 @@ public enum ExpenseCategory {
 
         String normalized = value.trim();
 
-        // Try to match displayName (case-insensitive)
         return Arrays.stream(ExpenseCategory.values())
                 .filter(c -> c.displayName.equalsIgnoreCase(normalized)
                         || c.name().equalsIgnoreCase(normalized)
