@@ -40,8 +40,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build and test with Maven
-        run: mvn clean verify
+      - name: Build and test with Maven (debug enabled)
+        run: mvn -e clean verify
 
       - name: Build Docker image
         run: docker build -t savr-api .
