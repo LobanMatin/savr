@@ -40,8 +40,24 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Wait for Postgres to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          for i in {1..10}; do
+            nc -z localhost 5432 && echo "Postgres is up!" && break
+            echo "Postgres not ready yet... retrying in 5s"
+            sleep 5
+          done
+
       - name: Build and test with Maven (debug enabled)
         run: mvn -e clean verify
+
+      - name: Print test failure reports
+        if: failure()
+        run: |
+          echo "::group::Surefire Test Logs"
+          find target/surefire-reports -type f -name "*.txt" -exec cat {} +
+          echo "::endgroup::"
 
       - name: Build Docker image
         run: docker build -t savr-api .
