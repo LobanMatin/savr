@@ -168,7 +168,7 @@ public class BudgetController {
             }
     )
     @PostMapping("/limit/category")
-    public ResponseEntity<Void> adjustCategoryLimit(@RequestParam ExpenseCategory category,
+    public ResponseEntity<Void> adjustCategoryLimit(@RequestParam String category,
                                                     @RequestParam BigDecimal limit,
                                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
         budgetService.adjustCategoryLimit(userDetails.getId(), category, limit);

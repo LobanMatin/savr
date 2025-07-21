@@ -73,12 +73,13 @@ public class BudgetService {
         budgetRepository.save(budget);
     }
 
-    public void adjustCategoryLimit(Long userId, ExpenseCategory category, BigDecimal limit) {
+    public void adjustCategoryLimit(Long userId, String category, BigDecimal limit) {
         Budget budget = budgetRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Budget not found for this user."));
 
-        if (!budget.getCategoryLimits().containsKey(category)) {
-            throw new ResourceNotFoundException("Category limit does not exist.");
+        ExpenseCategory expenseCategory = ExpenseCategory.fromString(category);
+        if ( expenseCategory == ExpenseCategory.NA) {
+            throw new ResourceNotFoundException("Category does not exist.");
         }
 
         BigDecimal sum = BigDecimal.ZERO;
@@ -86,7 +87,7 @@ public class BudgetService {
             sum = sum.add(value);
         }
 
-        budget.getCategoryLimits().put(category, limit); // Add or update
+        budget.getCategoryLimits().put(expenseCategory, limit); // Add or update
         budgetRepository.save(budget);
     }
 
