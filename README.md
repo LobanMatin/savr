@@ -19,11 +19,23 @@ A secure and user-centric REST API built with Spring Boot for managing personal 
 ## Tech Stack
 
 * **Java 17** + **Spring Boot 3**
-* **PostgreSQL**
+* **PostgreSQL (13)**
 * **Spring Security + JWT**
 * **Lombok**
 * **OpenAPI / Swagger UI**
 * **JUnit + Mockito** for testing
+
+---
+
+## Deployment
+
+Both the database and API have been deployed on render, with the following end point for the API:
+
+```
+https://savr-api-r6be.onrender.com
+```
+
+PRs to main need to be reviewed and pass the CI/CD pipeline through github actions to be succefully deployed on render.
 
 ---
 
@@ -32,7 +44,7 @@ A secure and user-centric REST API built with Spring Boot for managing personal 
 Interactive Swagger UI available at:
 
 ```
-http://localhost:8080/swagger-ui/index.html
+https://savr-api-r6be.onrender.com/swagger-ui/index.html
 ```
 
 It includes detailed descriptions, request/response examples, and parameter annotations.
@@ -53,129 +65,25 @@ cd budget-api
 Create a `.env` file or set environment variables:
 
 ```
-DB_URL=jdbc:postgresql://localhost:5432/budget_db
-DB_USERNAME=yourusername
-DB_PASSWORD=yourpassword
-JWT_SECRET=your_jwt_secret
+POSTGRES_DB=db_name
+POSTGRES_USER=db_user
+POSTGRES_PASSWORD=db_pass
+SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/db_name
+SPRING_DATASOURCE_USERNAME=your_db_user
+SPRING_DATASOURCE_PASSWORD=your_db_pass
+JWT_SECRET=your_secret
+JWT_EXPIRATION=8640000
 ```
 
 Or configure directly in `application.yml` or `application.properties`.
 
-### 3. Run PostgreSQL
-
-Ensure PostgreSQL is running and a database named `budget_db` is created.
-
-### 4. Run the Application
+### 3. Run API locally
 
 ```bash
-./mvnw spring-boot:run
+docker compose up --build
 ```
 
 ---
-
-## API Usage Examples
-
-### Register a User
-
-```http
-POST /auth/register
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "securePass123"
-}
-```
-
-### Login
-
-```http
-POST /auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "securePass123"
-}
-```
-
-Response:
-
-```json
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-```
-
-Use this token in headers:
-
-```
-Authorization: Bearer <your-token>
-```
-
-### Create Budget
-
-```http
-POST /budget
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "totalIncome": 5000,
-  "totalLimit": 1500
-}
-```
-
-### Upload CSV Expenses
-
-```http
-POST /expenses/upload
-Authorization: Bearer <token>
-Content-Type: multipart/form-data
-
-file: expenses.csv
-```
-
-> CSV format must be: `date, amount, title`
-
----
-
-## Running Tests
-
-```bash
-./mvnw test
-```
-
-Includes unit and integration tests for service and controller layers.
-
----
-
-## Deployment
-
-You can deploy using Docker, Heroku, or any Spring-compatible cloud service.
-
-### Sample Dockerfile
-
-```Dockerfile
-FROM openjdk:21
-COPY target/budget-api.jar app.jar
-ENTRYPOINT ["java", "-jar", "app.jar"]
-```
-
-Build and run:
-
-```bash
-./mvnw package
-docker build -t budget-api .
-docker run -p 8080:8080 budget-api
-```
-
----
-
-## Contribution
-
-Pull requests will be welcome, once CI/CD and unit testing has been integrated.
-
----
-
 ## Author
 
 **Loban Matin**
