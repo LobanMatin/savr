@@ -31,7 +31,7 @@ public class UserService {
         User user = User.builder()
                 .email(request.getEmail())
                 .password(encodedPassword)
-                .role(Role.USER)
+                .role(Role.ADMIN)
                 .build();
 
         userRepository.save(user);
