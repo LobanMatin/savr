@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class TokenBlacklistService {
 
-    // Thread safe implementation of blacklist
     private final Set<String> blacklist = ConcurrentHashMap.newKeySet();
 
     public void blacklist(String token) {
