@@ -236,18 +236,14 @@ public class ExpenseController {
     }
 
     @Operation(
-            summary = "Delete all expenses (Admin only)",
-            description = "Deletes all expenses in the system. This action is restricted to users with the ADMIN role.",
+            summary = "Delete all expenses",
+            description = "Deletes all expenses in the system.",
             responses = {
                     @ApiResponse(responseCode = "204",
                             description = "All expenses deleted successfully.",
                             content = @Content),
-                    @ApiResponse(responseCode = "403",
-                            description = "Access denied. You do not have permission to access this resource.",
-                            content = @Content)
             }
     )
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping
     public ResponseEntity<Void> deleteExpenses() {
         expenseService.deleteAllExpenses();
