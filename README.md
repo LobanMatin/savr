@@ -51,6 +51,12 @@ It includes detailed descriptions, request/response examples, and parameter anno
 
 ---
 
+## API Architecture
+
+![API Architecture](API_Architecture.png)
+
+---
+
 ## Setup Instructions
 
 ### 1. Clone the Repository
