@@ -83,14 +83,8 @@ public class ExpenseService {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;
-            boolean firstLine = true;
 
             while ((line = reader.readLine()) != null) {
-                if (firstLine) {
-                    firstLine = false;
-                    continue; // skip header
-                }
-
                 String[] values = line.split(",");
                 if (values.length < 3) {
                     // Skip malformed lines
@@ -99,7 +93,7 @@ public class ExpenseService {
 
                 try {
                     LocalDate date = LocalDate.parse(values[0].trim(), formatter);
-                    BigDecimal amount = new BigDecimal(values[1].trim());
+                    BigDecimal amount = new BigDecimal(values[1].trim()).abs();
                     String title = values[2].trim();
 
                     if (!expenseRepository.existsByUserIdAndDateAndAmountAndTitle(getCurrentUserId(), date, amount, title)) {
